@@ -21,5 +21,32 @@ $token->getAccess(); // accessValue
 $token->getRefresh(); // refreshValue
 ```
 
+### Configuration
+For configuration you have to use [ConfigInterface](./src/ConfigInterface.php).
+Few implementations available out-of-box:
+
+#### Config
+Simple Yii2 base object: [Config](./src/Config.php)
+
+```php
+<?php
+
+use Wearesho\Yii2\Authorization;
+
+$config = new Authorization\Config([
+    'expireInterval' => 'PT1M', // as \DateInterval value format
+]);
+
+$config = new Authorization\Config([
+    'expireInterval' => new \DateInterval("PT1M"), // as \DateInterval instance
+]);
+
+$config = new Authorization\Config([
+    'expireInterval' => function(): \DateInterval {
+        return new \DateInterval("PT1M");
+    }, // as \Closure that returns \DateInterval
+]);
+```
+
 ## License
 [MIT](./LICENSE)
