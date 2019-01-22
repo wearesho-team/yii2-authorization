@@ -1,4 +1,7 @@
 # Yii2 Authorization
+[![Build Status](https://travis-ci.org/wearesho-team/yii2-authorization.svg?branch=master)](https://travis-ci.org/wearesho-team/yii2-authorization)
+[![codecov](https://codecov.io/gh/wearesho-team/yii2-authorization/branch/master/graph/badge.svg)](https://codecov.io/gh/wearesho-team/yii2-authorization)
+
 Authorizing users using redis tokens for Yii2
 
 ## Installation
