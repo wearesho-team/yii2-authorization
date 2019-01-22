@@ -66,5 +66,37 @@ $config->getExpireInterval(0); // AUTHORIZATION_EXPIRE_INTERVAL will be loaded f
 
 ```
 
+### Repository
+To store tokens you should use [Repository](./src/Repository.php).
+It will store tokens in specified redis connection.
+
+```php
+<?php
+
+use yii\redis;
+use Wearesho\Yii2\Authorization;
+use Ramsey\Uuid\UuidFactoryInterface;
+
+$repository = new Authorization\Repository([
+    'config' => Authorization\ConfigInterface::class,
+    'redis' => redis\Connection::class, // your connection
+    'factory' => UuidFactoryInterface::class, // some implementation 
+]);
+
+$userId = 1;
+
+// Creating new token pair
+$token = $repository->create($userId); // Token entity
+
+// Getting user ID using access token
+$repository->get($token->getAccess()); // will return 1
+
+// Removing token pair
+$userId = $repository->delete($token->getRefresh());
+
+// Then you can create new token pair (for refreshing)
+$newToken = $repository->create($userId);
+```
+
 ## License
 [MIT](./LICENSE)
