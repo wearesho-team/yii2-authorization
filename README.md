@@ -48,5 +48,20 @@ $config = new Authorization\Config([
 ]);
 ```
 
+#### Environment configuration
+To use environment to configure authorization you should use [EnvironmentConfig](./src / EnvironmentConfig . php).  
+Environment keys(with default prefix):
+- **AUTHORIZATION_EXPIRE_INTERVAL ** -(default: null), seconds before tokens will be expired
+
+```php
+<?php
+
+use Wearesho\Yii2\Authorization;
+
+$config = new Authorization\EnvironmentConfig();
+$config->getExpireInterval(0); // AUTHORIZATION_EXPIRE_INTERVAL will be loaded from environment
+
+```
+
 ## License
 [MIT](./LICENSE)
