@@ -98,5 +98,24 @@ $userId = $repository->delete($token->getRefresh());
 $newToken = $repository->create($userId);
 ```
 
+### HasToken
+To implement part of yii`s web\Identity interface you should use
+[HasToken](./src/HasToken.php) trait, which implement findIdentityByAccessToken
+method and will allow to use something like HttpBearerAuth behaviors.
+
+```php
+<?php
+
+use Wearesho\Yii2\Authorization;
+use yii\web;
+
+class User implements web\IdentityInterface
+{
+    use Authorization\HasToken;
+    
+    // then, implement other interface methods
+}
+```
+
 ## License
 [MIT](./LICENSE)
