@@ -98,6 +98,31 @@ $userId = $repository->delete($token->getRefresh());
 $newToken = $repository->create($userId);
 ```
 
+### Bootstrap
+To automatically configure [ConfigInterface](./src/ConfigInterface.php)
+definition you should use [Bootstrap](./src/Bootstrap.php).
+
+```php
+<?php
+
+// config.php
+
+use Wearesho\Yii2\Authorization;
+
+return [
+    'bootstrap' => [
+        'authorization' => [
+            'class' => Authorization\Bootstrap::class,
+            'config' => [
+              'class' => Authorization\Config::class,
+                'expireInterval' => 'PT30M', // 30 minutes
+            ],
+        ],
+    ],
+];
+
+```
+
 ### HasToken
 To implement part of yii`s web\Identity interface you should use
 [HasToken](./src/HasToken.php) trait, which implement findIdentityByAccessToken
