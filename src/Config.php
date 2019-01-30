@@ -25,7 +25,7 @@ class Config extends base\BaseObject implements ConfigInterface
             throw new base\InvalidConfigException("expireInterval must be set", 0);
         }
 
-        if (is_string($this->expireInterval)) {
+        if (\is_string($this->expireInterval)) {
             try {
                 $this->expireInterval = new \DateInterval($this->expireInterval);
             } catch (\Exception $exception) {
@@ -39,9 +39,9 @@ class Config extends base\BaseObject implements ConfigInterface
         }
 
         if ($this->expireInterval instanceof \Closure
-            || is_array($this->expireInterval) && is_callable($this->expireInterval)
+            || \is_array($this->expireInterval) && \is_callable($this->expireInterval)
         ) {
-            $this->expireInterval = call_user_func($this->expireInterval);
+            $this->expireInterval = \call_user_func($this->expireInterval);
         }
 
         if (!$this->expireInterval instanceof \DateInterval) {

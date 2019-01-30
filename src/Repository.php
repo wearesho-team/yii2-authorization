@@ -51,7 +51,7 @@ class Repository extends base\BaseObject
         $key = $this->getAccessKey($access);
         /** @var string|null $value */
         $value = $this->redis->get($key);
-        if (is_null($value)) {
+        if (\is_null($value)) {
             return $value;
         }
 
@@ -70,7 +70,7 @@ class Repository extends base\BaseObject
 
         $refreshKey = $this->getRefreshKey($refresh);
         $access = $this->redis->get($refreshKey);
-        if (is_null($access)) {
+        if (\is_null($access)) {
             return null;
         }
 
