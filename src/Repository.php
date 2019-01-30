@@ -83,7 +83,7 @@ class Repository extends base\BaseObject
             $accessKey
         );
 
-        return is_null($userId) ? null : (int)$userId;
+        return (int)$userId ?: null;
     }
 
     public function create(int $userId): Token
