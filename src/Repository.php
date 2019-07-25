@@ -58,6 +58,21 @@ class Repository extends base\BaseObject
         return (int)$value;
     }
 
+    public function ttl(string $access): ?int
+    {
+        if (!$this->validate($access)) {
+            return null;
+        }
+
+        $key = $this->getAccessKey($access);
+        $ttl = $this->redis->ttl($key);
+        if (is_null($ttl)) {
+            return $ttl;
+        }
+
+        return (int)$ttl;
+    }
+
     /**
      * @param string $refresh
      * @return int|null user id if deleted or null if refresh token is invalid

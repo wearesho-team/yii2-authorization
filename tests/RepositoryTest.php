@@ -77,6 +77,59 @@ class RepositoryTest extends TestCase
         );
     }
 
+    public function testTtlWithValueInRedis(): void
+    {
+        $repository = new Authorization\Repository([
+            'redis' => $redis = $this->createMock(redis\Connection::class),
+            'config' => $this->createMock(Authorization\Config::class),
+            'factory' => new UuidFactory,
+        ]);
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $token = Uuid::uuid4();
+
+        $redis
+            ->expects($this->once())
+            ->method('__call')
+            ->with(
+                $this->equalTo('ttl'),
+                $this->equalTo(["access-{$token}"])
+            )
+            ->willReturn($id = 1);
+
+
+        $this->assertEquals(
+            $id,
+            $repository->ttl((string)$token)
+        );
+    }
+
+    public function testTtlWithNoValueInRedis(): void
+    {
+        $repository = new Authorization\Repository([
+            'redis' => $redis = $this->createMock(redis\Connection::class),
+            'config' => $this->createMock(Authorization\Config::class),
+            'factory' => new UuidFactory,
+        ]);
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $token = Uuid::uuid4();
+
+        $redis
+            ->expects($this->once())
+            ->method('__call')
+            ->with(
+                $this->equalTo('ttl'),
+                $this->equalTo(["access-{$token}"])
+            )
+            ->willReturn(null);
+
+
+        $this->assertNull(
+            $repository->ttl((string)$token)
+        );
+    }
+
     public function testDeleteWithInvalidToken(): void
     {
         $repository = new Authorization\Repository([
