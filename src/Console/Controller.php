@@ -36,7 +36,11 @@ class Controller extends console\Controller
         }
     }
 
-    public function create(int $userId): void
+    /**
+     * Creates new access-refresh token pair
+     * @param int $userId
+     */
+    public function actionCreate(int $userId): void
     {
         $token = $this->repository->create($userId);
 
@@ -44,10 +48,14 @@ class Controller extends console\Controller
         $this->stdout("Access Token = {$token->getAccess()}" . PHP_EOL, helpers\Console::FG_GREEN);
         $this->stdout("Refresh Token = {$token->getRefresh()}" . PHP_EOL, helpers\Console::FG_YELLOW);
 
-        $this->ttl($token->getAccess());
+        $this->actionTtl($token->getAccess());
     }
 
-    public function ttl(string $access): void
+    /**
+     * Displays TTL (seconds) and expire date for access token
+     * @param string $access
+     */
+    public function actionTtl(string $access): void
     {
         $ttl = $this->repository->ttl($access);
 
@@ -62,7 +70,11 @@ class Controller extends console\Controller
         $this->stdout("(expire {$expire})" . PHP_EOL, helpers\Console::FG_GREY);
     }
 
-    public function delete(string $refresh): void
+    /**
+     * Deletes access-refresh token pair
+     * @param string $refresh
+     */
+    public function actionDelete(string $refresh): void
     {
         $userId = $this->repository->delete($refresh);
         if (is_null($userId)) {
