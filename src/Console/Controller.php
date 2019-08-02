@@ -22,10 +22,10 @@ class Controller extends console\Controller
 
     /**
      * @param base\Action $action
-     * @return bool|void
+     * @return bool
      * @throws base\InvalidConfigException
      */
-    public function beforeAction($action)
+    public function beforeAction($action): bool
     {
         $beforeAction = parent::beforeAction($action);
         if ($beforeAction) {
@@ -34,6 +34,7 @@ class Controller extends console\Controller
                 Authorization\Repository::class
             );
         }
+        return $beforeAction;
     }
 
     /**
