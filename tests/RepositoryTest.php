@@ -304,34 +304,19 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('__call')
             ->with(
-                $this->equalTo('set'),
-                $this->equalTo(["access-{$access}", $userId])
+                $this->equalTo('setex'),
+                $this->equalTo(["access-{$access}", 30, $userId,])
             );
         $redis
             ->expects($this->at(2))
             ->method('__call')
             ->with(
-                $this->equalTo('set'),
-                $this->equalTo(["refresh-{$refresh}", $access])
+                $this->equalTo('setex'),
+                $this->equalTo(["refresh-{$refresh}", 30, $access,])
             );
 
         $redis
             ->expects($this->at(3))
-            ->method('__call')
-            ->with(
-                $this->equalTo('expire'),
-                $this->equalTo(["access-{$access}", 30])
-            );
-        $redis
-            ->expects($this->at(4))
-            ->method('__call')
-            ->with(
-                $this->equalTo('expire'),
-                $this->equalTo(["refresh-{$refresh}", 30])
-            );
-
-        $redis
-            ->expects($this->at(5))
             ->method('__call')
             ->with(
                 $this->equalTo('exec'),

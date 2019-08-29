@@ -115,13 +115,13 @@ class Repository extends base\BaseObject
 
         $this->redis->setex(
             $accessKey = $this->getAccessKey($token->getAccess()),
-            $userId,
-            $expire
+            $expire,
+            $userId
         );
         $this->redis->setex(
             $refreshKey = $this->getRefreshKey($token->getRefresh()),
-            $token->getAccess(),
-            $expire
+            $expire,
+            $token->getAccess()
         );
 
         $this->redis->exec();
