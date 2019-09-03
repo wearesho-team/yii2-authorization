@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Wearesho\Yii2\Authorization;
 
 use Carbon\Carbon;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidFactory;
-use Ramsey\Uuid\UuidFactoryInterface;
+use Ramsey\Uuid;
 use yii\di;
 use yii\base;
 use yii\redis;
@@ -21,8 +19,8 @@ class Repository extends base\BaseObject
     /** @var string|array|redis\Connection */
     public $redis = 'redis';
 
-    /** @var string|array|UuidFactoryInterface */
-    public $factory = UuidFactory::class;
+    /** @var string|array|Uuid\UuidFactoryInterface */
+    public $factory = Uuid\UuidFactory::class;
 
     /** @var array|string|ConfigInterface */
     public $config = ConfigInterface::class;
@@ -35,7 +33,7 @@ class Repository extends base\BaseObject
         parent::init();
         $this->redis = di\Instance::ensure($this->redis, redis\Connection::class);
         $this->config = di\Instance::ensure($this->config, ConfigInterface::class);
-        $this->factory = di\Instance::ensure($this->factory, UuidFactoryInterface::class);
+        $this->factory = di\Instance::ensure($this->factory, Uuid\UuidFactoryInterface::class);
     }
 
     /**
@@ -141,6 +139,6 @@ class Repository extends base\BaseObject
 
     protected function validate(string $value): bool
     {
-        return Uuid::isValid($value);
+        return Uuid\Uuid::isValid($value);
     }
 }
