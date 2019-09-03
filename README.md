@@ -7,7 +7,7 @@ Authorizing users using redis tokens for Yii2
 ## Installation
 
 ```bash
-composer require wearesho-team/yii2-authorization:^1.0.0
+composer require wearesho-team/yii2-authorization:^1.3
 ```
 
 ## Usage
