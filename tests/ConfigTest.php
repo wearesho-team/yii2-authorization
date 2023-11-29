@@ -99,6 +99,6 @@ class ConfigTest extends TestCase
             "expireInterval must be set"
         );
         $this->expectExceptionCode(0);
-        new Authorization\Config;
+        new Authorization\Config();
     }
 }

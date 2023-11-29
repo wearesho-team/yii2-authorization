@@ -15,7 +15,7 @@ class EnvironmentConfigTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->config = new Authorization\EnvironmentConfig;
+        $this->config = new Authorization\EnvironmentConfig();
         putenv('AUTHORIZATION_EXPIRE_INTERVAL'); // clear environment
     }
 

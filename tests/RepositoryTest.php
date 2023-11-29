@@ -18,7 +18,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
         $id = $repository->get('notUuid');
         $this->assertNull($id);
@@ -29,7 +29,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -56,7 +56,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -82,7 +82,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -109,7 +109,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -135,7 +135,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
         $invalidToken = 'notUuid';
 
@@ -147,7 +147,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -173,7 +173,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -195,15 +195,13 @@ class RepositoryTest extends TestCase
                                 return $accessToken;
                             case "access-{$accessToken}":
                                 return null;
-                            default:
-                                $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                         }
+                        return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                     case "del":
                         $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
                         return 1;
-                    default:
-                        $this->fail("Unexpected method: {$method} (Redis Mock)");
                 }
+                $this->fail("Unexpected method: {$method} (Redis Mock)");
             });
 
         $this->assertNull(
@@ -216,7 +214,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory,
+            'factory' => new UuidFactory(),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -239,15 +237,13 @@ class RepositoryTest extends TestCase
                                     return $accessToken;
                                 case "access-{$accessToken}":
                                     return $userId;
-                                default:
-                                    $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                             }
+                            return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                         case "del":
                             $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
                             return $userId;
-                        default:
-                            $this->fail("Unexpected method: {$method} (Redis Mock)");
                     }
+                    $this->fail("Unexpected method: {$method} (Redis Mock)");
                 }
             );
 
@@ -306,12 +302,10 @@ class RepositoryTest extends TestCase
                                     $this->assertEquals($expireInterval, $expire);
                                     $this->assertEquals($userId, $value);
                                     return null;
-                                default:
-                                    $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                             }
-                        default:
-                            $this->fail("Unexpected method: {$method} (Redis Mock)");
+                            return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                     }
+                    return $this->fail("Unexpected method: {$method} (Redis Mock)");
                 }
             );
 
