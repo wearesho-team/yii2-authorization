@@ -181,40 +181,37 @@ class RepositoryTest extends TestCase
         /** @noinspection PhpUnhandledExceptionInspection */
         $accessToken = (string)Uuid::uuid4();
 
-        $redis
-            ->expects($this->at(0))
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(["refresh-{$refreshToken}"])
-            )
-            ->willReturn($accessToken);
 
-        $redis
-            ->expects($this->at(1))
+        $redis->expects($this->exactly(3))
             ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(["access-{$accessToken}"])
-            )
-            ->willReturn(null);
-
-
-        $redis
-            ->expects($this->at(2))
-            ->method('__call')
-            ->with(
-                $this->equalTo('del'),
-                $this->equalTo(["refresh-{$refreshToken}", "access-{$accessToken}"])
-            )
-            ->willReturn(1);
+            ->willReturnCallback(function (string $method, array $keys) use ($accessToken, $refreshToken) {
+                $this->assertContains($method, ['get', 'del']);
+                switch ($method) {
+                    case 'get':
+                        $this->assertCount(1, $keys);
+                        $key = array_shift($keys);
+                        switch ($key) {
+                            case "refresh-{$refreshToken}":
+                                return $accessToken;
+                            case "access-{$accessToken}":
+                                return null;
+                            default:
+                                $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
+                        }
+                    case "del":
+                        $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
+                        return 1;
+                    default:
+                        $this->fail("Unexpected method: {$method} (Redis Mock)");
+                }
+            });
 
         $this->assertNull(
             $repository->delete((string)$refreshToken)
         );
     }
 
-    public function testDeleteBothAccessAndRefresj(): void
+    public function testDeleteBothAccessAndRefresh(): void
     {
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
@@ -226,34 +223,33 @@ class RepositoryTest extends TestCase
         $refreshToken = (string)Uuid::uuid4();
         /** @noinspection PhpUnhandledExceptionInspection */
         $accessToken = (string)Uuid::uuid4();
+        $userId = 1337;
 
-        $redis
-            ->expects($this->at(0))
+        $redis->expects($this->exactly(3))
             ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(["refresh-{$refreshToken}"])
-            )
-            ->willReturn($accessToken);
-
-        $redis
-            ->expects($this->at(1))
-            ->method('__call')
-            ->with(
-                $this->equalTo('get'),
-                $this->equalTo(["access-{$accessToken}"])
-            )
-            ->willReturn($userId = 1);
-
-
-        $redis
-            ->expects($this->at(2))
-            ->method('__call')
-            ->with(
-                $this->equalTo('del'),
-                $this->equalTo(["refresh-{$refreshToken}", "access-{$accessToken}"])
-            )
-            ->willReturn(1);
+            ->willReturnCallback(
+                function (string $method, array $keys) use ($accessToken, $refreshToken, $userId) {
+                    $this->assertContains($method, ['get', 'del']);
+                    switch ($method) {
+                        case 'get':
+                            $this->assertCount(1, $keys);
+                            $key = array_shift($keys);
+                            switch ($key) {
+                                case "refresh-{$refreshToken}":
+                                    return $accessToken;
+                                case "access-{$accessToken}":
+                                    return $userId;
+                                default:
+                                    $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
+                            }
+                        case "del":
+                            $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
+                            return $userId;
+                        default:
+                            $this->fail("Unexpected method: {$method} (Redis Mock)");
+                    }
+                }
+            );
 
         $this->assertEquals(
             $userId,
@@ -270,58 +266,55 @@ class RepositoryTest extends TestCase
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
-        $access = Uuid::uuid4();
+        $access = Uuid::uuid4()->toString();
         /** @noinspection PhpUnhandledExceptionInspection */
-        $refresh = Uuid::uuid4();
+        $refresh = Uuid::uuid4()->toString();
 
-        $userId = 1;
+        $userId = 13371;
+        $expireInterval = 30;
 
         /** @noinspection PhpUnhandledExceptionInspection */
         $config
             ->expects($this->once())
             ->method('getExpireInterval')
             ->with($userId)
-            ->willReturn(new \DateInterval('PT30S'));
+            ->willReturn(new \DateInterval('PT' . $expireInterval . 'S'));
 
         $factory
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('uuid4')
-            ->willReturn($access);
-        $factory
-            ->expects($this->at(1))
-            ->method('uuid4')
-            ->willReturn($refresh);
+            ->willReturn($access, $refresh);
 
-        $redis
-            ->expects($this->at(0))
+        $redis->expects($this->exactly(4))
             ->method('__call')
-            ->with(
-                $this->equalTo('multi'),
-                $this->equalTo([])
+            ->willReturnCallback(
+                function (string $method, array $keys) use ($access, $refresh, $expireInterval, $userId) {
+                    switch ($method) {
+                        case "multi":
+                        case "exec":
+                            $this->assertEquals([], $keys);
+                            return null;
+                        case 'setex':
+                            $this->assertCount(3, $keys);
+                            [$key, $expire, $value] = $keys;
+                            switch ($key) {
+                                case "refresh-{$refresh}":
+                                    $this->assertEquals($expireInterval, $expire);
+                                    $this->assertEquals($access, $value);
+                                    return null;
+                                case "access-{$access}":
+                                    $this->assertEquals($expireInterval, $expire);
+                                    $this->assertEquals($userId, $value);
+                                    return null;
+                                default:
+                                    $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
+                            }
+                        default:
+                            $this->fail("Unexpected method: {$method} (Redis Mock)");
+                    }
+                }
             );
 
-        $redis
-            ->expects($this->at(1))
-            ->method('__call')
-            ->with(
-                $this->equalTo('setex'),
-                $this->equalTo(["access-{$access}", 30, $userId,])
-            );
-        $redis
-            ->expects($this->at(2))
-            ->method('__call')
-            ->with(
-                $this->equalTo('setex'),
-                $this->equalTo(["refresh-{$refresh}", 30, $access,])
-            );
-
-        $redis
-            ->expects($this->at(3))
-            ->method('__call')
-            ->with(
-                $this->equalTo('exec'),
-                $this->equalTo([])
-            );
 
         Carbon::setTestNow(Carbon::now()); // fix time to correct expire testing
         $token = $repository->create($userId);
