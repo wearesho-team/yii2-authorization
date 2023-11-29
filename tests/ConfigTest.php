@@ -26,8 +26,8 @@ class ConfigTest extends TestCase
         $invalidString = 'P30M2';
         $this->expectException(base\InvalidConfigException::class);
         $this->expectExceptionCode(1);
-        $this->expectExceptionMessage(
-            "Invalid expireInterval format: Unknown or bad format (P30M2)"
+        $this->expectExceptionMessageMatches(
+            "/^Invalid expireInterval format\:.* Unknown or bad format \(P30M2\)$/"
         );
         new Authorization\Config([
             'expireInterval' => $invalidString,
