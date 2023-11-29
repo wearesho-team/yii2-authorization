@@ -17,12 +17,14 @@ class EnvironmentConfigTest extends TestCase
         parent::setUp();
         $this->config = new Authorization\EnvironmentConfig();
         putenv('AUTHORIZATION_EXPIRE_INTERVAL'); // clear environment
+        putenv('AUTHORIZATION_REFRESH_EXPIRE_INTERVAL'); // clear environment
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
         putenv('AUTHORIZATION_EXPIRE_INTERVAL'); // clear environment
+        putenv('AUTHORIZATION_REFRESH_EXPIRE_INTERVAL'); // clear environment
     }
 
     public function testEmptyExpireInterval(): void
@@ -32,10 +34,27 @@ class EnvironmentConfigTest extends TestCase
         $this->config->getExpireInterval(0);
     }
 
+    public function testEmptyRefreshExpireInterval(): void
+    {
+        $this->expectException(\Horat1us\Environment\Exception\Missing::class);
+        $this->expectExceptionMessage('Missing environment key AUTHORIZATION_REFRESH_EXPIRE_INTERVAL');
+        $this->config->getRefreshExpireInterval(0);
+    }
+
     public function testExpireInterval(): void
     {
         putenv('AUTHORIZATION_EXPIRE_INTERVAL=1');
         $expireInterval = $this->config->getExpireInterval(0);
+        $this->assertEquals(
+            new \DateInterval('PT1S'),
+            $expireInterval
+        );
+    }
+
+    public function testRefreshExpireInterval(): void
+    {
+        putenv('AUTHORIZATION_REFRESH_EXPIRE_INTERVAL=1');
+        $expireInterval = $this->config->getRefreshExpireInterval(0);
         $this->assertEquals(
             new \DateInterval('PT1S'),
             $expireInterval
