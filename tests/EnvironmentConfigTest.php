@@ -7,10 +7,6 @@ namespace Wearesho\Yii2\Authorization\Tests;
 use PHPUnit\Framework\TestCase;
 use Wearesho\Yii2\Authorization;
 
-/**
- * Class EnvironmentConfigTest
- * @package Wearesho\Yii2\Authorization\Tests
- */
 class EnvironmentConfigTest extends TestCase
 {
     /** @var Authorization\EnvironmentConfig */
@@ -29,12 +25,10 @@ class EnvironmentConfigTest extends TestCase
         putenv('AUTHORIZATION_EXPIRE_INTERVAL'); // clear environment
     }
 
-    /**
-     * @expectedException \Horat1us\Environment\Exception\Missing
-     * @expectedExceptionMessage Missing environment key AUTHORIZATION_EXPIRE_INTERVAL
-     */
     public function testEmptyExpireInterval(): void
     {
+        $this->expectException(\Horat1us\Environment\Exception\Missing::class);
+        $this->expectExceptionMessage('Missing environment key AUTHORIZATION_EXPIRE_INTERVAL');
         $this->config->getExpireInterval(0);
     }
 
@@ -42,7 +36,6 @@ class EnvironmentConfigTest extends TestCase
     {
         putenv('AUTHORIZATION_EXPIRE_INTERVAL=1');
         $expireInterval = $this->config->getExpireInterval(0);
-        /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertEquals(
             new \DateInterval('PT1S'),
             $expireInterval
