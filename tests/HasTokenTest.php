@@ -21,7 +21,7 @@ class HasTokenTest extends TestCase
             ->with(Authorization\Repository::class)
             ->willReturn($repository = $this->createMock(Authorization\Repository::class));
 
-        $user = new class()
+        $user = new class ()
         {
             use Authorization\HasToken;
         };
@@ -30,7 +30,7 @@ class HasTokenTest extends TestCase
             $repository,
             $user::getAuthorizationRepository()
         );
-        \Yii::$container = new di\Container;
+        \Yii::$container = new di\Container();
     }
 
     public function testFindingIdentityByWrongToken(): void
@@ -50,7 +50,7 @@ class HasTokenTest extends TestCase
 
             public static function findIdentity(int $id): ?self
             {
-                return new self;
+                return new self();
             }
         };
 
@@ -82,7 +82,7 @@ class HasTokenTest extends TestCase
 
             public static function findIdentity(int $id): ?self
             {
-                return $id === 1 ? new self : null;
+                return $id === 1 ? new self() : null;
             }
         };
 

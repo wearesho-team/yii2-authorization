@@ -15,7 +15,7 @@ class BootstrapTest extends TestCase
     {
         $this->expectException(base\InvalidConfigException::class);
         $this->expectExceptionMessage('Config definition must be set.');
-        new Authorization\Bootstrap;
+        new Authorization\Bootstrap();
     }
 
     public function testSettingDefinitionOnContainer(): void

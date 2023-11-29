@@ -38,7 +38,8 @@ class Config extends base\BaseObject implements ConfigInterface
             return;
         }
 
-        if ($this->expireInterval instanceof \Closure
+        if (
+            $this->expireInterval instanceof \Closure
             || is_array($this->expireInterval) && is_callable($this->expireInterval)
         ) {
             $this->expireInterval = call_user_func($this->expireInterval);
