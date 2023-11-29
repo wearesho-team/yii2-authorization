@@ -5,17 +5,12 @@ namespace Wearesho\Yii2\Authorization\Tests;
 use Wearesho\Yii2\Authorization;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class TokenTest
- * @package Wearesho\Yii2\Authorization\Tests
- */
 class TokenTest extends TestCase
 {
     protected const ACCESS = 'accessValue';
     protected const REFRESH = 'refreshValue';
 
-    /** @var Authorization\Token */
-    protected $token;
+    protected Authorization\Token $token;
 
     protected function setUp(): void
     {
