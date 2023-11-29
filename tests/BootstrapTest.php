@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Wearesho\Yii2\Authorization\Tests;
 
 use yii\di;
@@ -7,18 +9,12 @@ use yii\base;
 use Wearesho\Yii2\Authorization;
 use PHPUnit\Framework\TestCase;
 
-/**
- * Class BootstrapTest
- * @package Wearesho\Yii2\Authorization\Tests
- */
 class BootstrapTest extends TestCase
 {
-    /**
-     * @expectedException \yii\base\InvalidConfigException
-     * @expectedExceptionMessage Config definition must be set.
-     */
     public function testMissingConfigDefinition(): void
     {
+        $this->expectException(base\InvalidConfigException::class);
+        $this->expectExceptionMessage('Config definition must be set.');
         new Authorization\Bootstrap;
     }
 
