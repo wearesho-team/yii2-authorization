@@ -19,7 +19,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -33,7 +33,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -63,7 +63,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -92,7 +92,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -122,7 +122,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -151,7 +151,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -179,7 +179,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -194,7 +194,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -223,7 +223,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $refreshEncoder = $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
@@ -270,7 +270,7 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(new FeatureSet),
+            'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $refreshEncoder = $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
