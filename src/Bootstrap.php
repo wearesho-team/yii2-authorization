@@ -21,7 +21,7 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
     public function init(): void
     {
         parent::init();
-        if (is_null($this->config)) {
+        if (\is_null($this->config)) {
             throw new base\InvalidConfigException("Config definition must be set.");
         }
     }

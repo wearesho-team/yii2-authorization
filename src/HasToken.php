@@ -44,7 +44,7 @@ trait HasToken
     public static function findIdentityByAccessToken($token, $type = null)
     {
         $userId = static::getAuthorizationRepository()->get($token);
-        if (is_null($userId)) {
+        if (\is_null($userId)) {
             return null;
         }
 
