@@ -5,3 +5,4 @@
 /phpunit.xml export-ignore
 /README.md export-ignore
 /composer.lock export-ignore
+/.github export-ignore
