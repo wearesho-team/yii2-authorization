@@ -4,10 +4,6 @@ declare(strict_types=1);
 
 namespace Wearesho\Yii2\Authorization;
 
-/**
- * Class Token
- * @package Wearesho\Yii2\Authorization
- */
 class Token
 {
     /** @var string */

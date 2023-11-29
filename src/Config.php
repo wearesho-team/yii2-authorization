@@ -6,10 +6,6 @@ namespace Wearesho\Yii2\Authorization;
 
 use yii\base;
 
-/**
- * Class Config
- * @package Wearesho\Yii2\Authorization
- */
 class Config extends base\BaseObject implements ConfigInterface
 {
     /** @var \DateInterval|\Closure|string */
@@ -53,9 +49,6 @@ class Config extends base\BaseObject implements ConfigInterface
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function getExpireInterval(int $user): \DateInterval
     {
         return $this->expireInterval;

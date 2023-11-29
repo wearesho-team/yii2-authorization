@@ -12,10 +12,6 @@ use yii\di;
 use yii\base;
 use yii\redis;
 
-/**
- * Class Repository
- * @package Wearesho\Yii2\Authorization
- */
 class Repository extends base\BaseObject
 {
     /** @var string|array|redis\Connection */

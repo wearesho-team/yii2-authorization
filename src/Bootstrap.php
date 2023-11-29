@@ -6,10 +6,6 @@ namespace Wearesho\Yii2\Authorization;
 
 use yii\base;
 
-/**
- * Class Bootstrap
- * @package Wearesho\Yii2\Authorization
- */
 class Bootstrap extends base\BaseObject implements base\BootstrapInterface
 {
     /** @var string|array|ConfigInterface */
@@ -26,9 +22,6 @@ class Bootstrap extends base\BaseObject implements base\BootstrapInterface
         }
     }
 
-    /**
-     * @inheritdoc
-     */
     public function bootstrap($app): void
     {
         \Yii::$container->set(

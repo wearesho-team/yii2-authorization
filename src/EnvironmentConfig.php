@@ -6,10 +6,6 @@ namespace Wearesho\Yii2\Authorization;
 
 use Horat1us\Environment;
 
-/**
- * Class EnvironmentConfig
- * @package Wearesho\Yii2\Authorization
- */
 class EnvironmentConfig extends Environment\Yii2\Config implements ConfigInterface
 {
     public $keyPrefix = 'AUTHORIZATION_';

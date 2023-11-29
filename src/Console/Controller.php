@@ -11,10 +11,6 @@ use yii\console;
 use yii\base;
 use yii\di;
 
-/**
- * Class Controller
- * @package Wearesho\Yii2\Authorization\Console
- */
 class Controller extends console\Controller
 {
     /** @var string|array|Authorization\Repository */
