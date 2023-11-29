@@ -14,10 +14,15 @@ class ConfigTest extends TestCase
     {
         $config = new Authorization\Config([
             'expireInterval' => 'PT1M',
+            'refreshExpireInterval' => 'PT2M',
         ]);
         $this->assertEquals(
             new \DateInterval("PT1M"),
             $config->getExpireInterval(0)
+        );
+        $this->assertEquals(
+            new \DateInterval("PT2M"),
+            $config->getRefreshExpireInterval(0)
         );
     }
 
@@ -27,10 +32,11 @@ class ConfigTest extends TestCase
         $this->expectException(base\InvalidConfigException::class);
         $this->expectExceptionCode(1);
         $this->expectExceptionMessageMatches(
-            "/^Invalid expireInterval format\:.* Unknown or bad format \(P30M2\)$/"
+            "/^Invalid expireInterval format\:.* Unknown or bad format \(P30M2\), {$invalidString} given.$/"
         );
         new Authorization\Config([
             'expireInterval' => $invalidString,
+            'refreshExpireInterval' => 'PT1M',
         ]);
     }
 
@@ -40,6 +46,7 @@ class ConfigTest extends TestCase
 
         $config = new Authorization\Config([
             'expireInterval' => $interval,
+            'refreshExpireInterval' => 'PT1M',
         ]);
 
         $this->assertEquals($interval, $config->getExpireInterval(0));
@@ -53,6 +60,7 @@ class ConfigTest extends TestCase
 
         $config = new Authorization\Config([
             'expireInterval' => $getInterval,
+            'refreshExpireInterval' => 'PT1M',
         ]);
 
         $this->assertEquals(
@@ -74,6 +82,7 @@ class ConfigTest extends TestCase
         $this->expectException(base\InvalidConfigException::class);
         new Authorization\Config([
             'expireInterval' => $invalidClosure,
+            'refreshExpireInterval' => 'PT1M',
         ]);
     }
 
@@ -89,6 +98,7 @@ class ConfigTest extends TestCase
 
         new Authorization\Config([
             'expireInterval' => $invalidObject,
+            'refreshExpireInterval' => 'PT1M',
         ]);
     }
 
@@ -100,5 +110,17 @@ class ConfigTest extends TestCase
         );
         $this->expectExceptionCode(0);
         new Authorization\Config();
+    }
+
+    public function testEmptyRefreshExpireInterval(): void
+    {
+        $this->expectException(base\InvalidConfigException::class);
+        $this->expectExceptionMessage(
+            "refreshExpireInterval must be set"
+        );
+        $this->expectExceptionCode(1);
+        new Authorization\Config([
+            'expireInterval' => 'PT1M',
+        ]);
     }
 }

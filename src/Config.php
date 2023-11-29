@@ -11,6 +11,9 @@ class Config extends base\BaseObject implements ConfigInterface
     /** @var \DateInterval|\Closure|string */
     public $expireInterval;
 
+    /** @var \DateInterval|\Closure|string */
+    public $refreshExpireInterval;
+
     /**
      * @throws base\InvalidConfigException
      */
@@ -20,13 +23,32 @@ class Config extends base\BaseObject implements ConfigInterface
         if (empty($this->expireInterval)) {
             throw new base\InvalidConfigException("expireInterval must be set", 0);
         }
+        if (empty($this->refreshExpireInterval)) {
+            throw new base\InvalidConfigException("refreshExpireInterval must be set", 1);
+        }
 
-        if (is_string($this->expireInterval)) {
+        $this->validateExpireInterval($this->expireInterval);
+        $this->validateExpireInterval($this->refreshExpireInterval);
+    }
+
+    public function getExpireInterval(int $user): \DateInterval
+    {
+        return $this->expireInterval;
+    }
+
+    public function getRefreshExpireInterval(int $user): \DateInterval
+    {
+        return $this->refreshExpireInterval;
+    }
+
+    private function validateExpireInterval(&$expireInterval): void
+    {
+        if (is_string($expireInterval)) {
             try {
-                $this->expireInterval = new \DateInterval($this->expireInterval);
+                $expireInterval = new \DateInterval($expireInterval);
             } catch (\Exception $exception) {
                 throw new base\InvalidConfigException(
-                    "Invalid expireInterval format: {$exception->getMessage()}",
+                    "Invalid expireInterval format: {$exception->getMessage()}, {$expireInterval} given.",
                     1,
                     $exception
                 );
@@ -35,22 +57,17 @@ class Config extends base\BaseObject implements ConfigInterface
         }
 
         if (
-            $this->expireInterval instanceof \Closure
-            || is_array($this->expireInterval) && is_callable($this->expireInterval)
+            $expireInterval instanceof \Closure
+            || is_array($expireInterval) && is_callable($expireInterval)
         ) {
-            $this->expireInterval = call_user_func($this->expireInterval);
+            $expireInterval = call_user_func($expireInterval);
         }
 
-        if (!$this->expireInterval instanceof \DateInterval) {
+        if (!$expireInterval instanceof \DateInterval) {
             throw new base\InvalidConfigException(
                 "Invalid expireInterval format: must be \DateInterval or \Closure that returns \DateInterval",
                 2
             );
         }
-    }
-
-    public function getExpireInterval(int $user): \DateInterval
-    {
-        return $this->expireInterval;
     }
 }
