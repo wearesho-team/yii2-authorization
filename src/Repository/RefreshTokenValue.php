@@ -6,7 +6,6 @@ namespace Wearesho\Yii2\Authorization\Repository;
 
 class RefreshTokenValue
 {
-
     private string $accessToken;
     private int $userId;
 
