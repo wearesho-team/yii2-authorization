@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Wearesho\Yii2\Authorization\Tests;
 
 use Carbon\Carbon;
+use Ramsey\Uuid\FeatureSet;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidFactory;
 use yii\redis;
@@ -18,7 +19,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
         $id = $repository->get('notUuid');
         $this->assertNull($id);
@@ -29,7 +33,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -56,7 +63,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -82,7 +92,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -109,7 +122,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -135,7 +151,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -160,7 +179,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
         $invalidToken = 'notUuid';
 
@@ -172,7 +194,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -198,7 +223,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $refreshEncoder = $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -206,8 +234,13 @@ class RepositoryTest extends TestCase
         /** @noinspection PhpUnhandledExceptionInspection */
         $accessToken = (string)Uuid::uuid4();
 
+        $refreshEncoder
+            ->expects($this->once())
+            ->method('decode')
+            ->with(sha1($accessToken))
+            ->willReturn(null);
 
-        $redis->expects($this->exactly(3))
+        $redis->expects($this->exactly(2))
             ->method('__call')
             ->willReturnCallback(function (string $method, array $keys) use ($accessToken, $refreshToken) {
                 $this->assertContains($method, ['get', 'del']);
@@ -217,13 +250,11 @@ class RepositoryTest extends TestCase
                         $key = array_shift($keys);
                         switch ($key) {
                             case "refresh-{$refreshToken}":
-                                return $accessToken;
-                            case "access-{$accessToken}":
-                                return null;
+                                return sha1($accessToken);
                         }
                         return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                     case "del":
-                        $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
+                        $this->assertEquals($keys, ["refresh-{$refreshToken}"]);
                         return 1;
                 }
                 $this->fail("Unexpected method: {$method} (Redis Mock)");
@@ -239,7 +270,10 @@ class RepositoryTest extends TestCase
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
-            'factory' => new UuidFactory(),
+            'factory' => new UuidFactory(new FeatureSet),
+            'refreshEncoder' => $refreshEncoder = $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -248,7 +282,13 @@ class RepositoryTest extends TestCase
         $accessToken = (string)Uuid::uuid4();
         $userId = 1337;
 
-        $redis->expects($this->exactly(3))
+        $refreshEncoder
+            ->expects($this->once())
+            ->method('decode')
+            ->with(sha1($accessToken))
+            ->willReturn(new Authorization\Repository\RefreshTokenValue($accessToken, $userId));
+
+        $redis->expects($this->exactly(2))
             ->method('__call')
             ->willReturnCallback(
                 function (string $method, array $keys) use ($accessToken, $refreshToken, $userId) {
@@ -259,7 +299,7 @@ class RepositoryTest extends TestCase
                             $key = array_shift($keys);
                             switch ($key) {
                                 case "refresh-{$refreshToken}":
-                                    return $accessToken;
+                                    return sha1($accessToken);
                                 case "access-{$accessToken}":
                                     return $userId;
                             }
@@ -284,6 +324,9 @@ class RepositoryTest extends TestCase
             'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $config = $this->createMock(Authorization\Config::class),
             'factory' => $factory = $this->createMock(UuidFactory::class),
+            'refreshEncoder' => $refreshEncoder = $this->createMock(
+                Authorization\Repository\RefreshTokenValueEncoder::class
+            ),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -294,6 +337,12 @@ class RepositoryTest extends TestCase
         $userId = 13371;
         $expireInterval = 30;
         $refreshExpireInterval = 90;
+
+        $refreshEncoder
+            ->expects($this->once())
+            ->method('encode')
+            ->with(new Authorization\Repository\RefreshTokenValue($access, $userId))
+            ->willReturn(sha1($access));
 
         $config
             ->expects($this->once())
@@ -335,7 +384,7 @@ class RepositoryTest extends TestCase
                             switch ($key) {
                                 case "refresh-{$refresh}":
                                     $this->assertEquals($refreshExpireInterval, $expire);
-                                    $this->assertEquals($access, $value);
+                                    $this->assertEquals(sha1($access), $value);
                                     return null;
                                 case "access-{$access}":
                                     $this->assertEquals($expireInterval, $expire);
