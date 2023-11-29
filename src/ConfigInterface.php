@@ -13,4 +13,6 @@ interface ConfigInterface
      * @return \DateInterval
      */
     public function getExpireInterval(int $user): \DateInterval;
+
+    public function getRefreshExpireInterval(int $user): \DateInterval;
 }
