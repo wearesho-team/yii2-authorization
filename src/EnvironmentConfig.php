@@ -13,7 +13,12 @@ class EnvironmentConfig extends Environment\Yii2\Config implements ConfigInterfa
     public function getExpireInterval(int $user): \DateInterval
     {
         $expireSeconds = $this->getExpireSeconds($user);
-        /** @noinspection PhpUnhandledExceptionInspection */
+        return new \DateInterval("PT{$expireSeconds}S");
+    }
+
+    public function getRefreshExpireInterval(int $user): \DateInterval
+    {
+        $expireSeconds = $this->getRefreshExpireSeconds($user);
         return new \DateInterval("PT{$expireSeconds}S");
     }
 
@@ -24,5 +29,10 @@ class EnvironmentConfig extends Environment\Yii2\Config implements ConfigInterfa
     protected function getExpireSeconds(int $user): int
     {
         return (int)$this->getEnv('EXPIRE_INTERVAL');
+    }
+
+    protected function getRefreshExpireSeconds(int $user): int
+    {
+        return (int)$this->getEnv("REFRESH_EXPIRE_INTERVAL");
     }
 }
