@@ -7,7 +7,7 @@ Authorizing users using redis tokens for Yii2
 ## Installation
 
 ```bash
-composer require wearesho-team/yii2-authorization:^1.3
+composer require wearesho-team/yii2-authorization:^2.0
 ```
 
 ## Usage
@@ -38,23 +38,27 @@ use Wearesho\Yii2\Authorization;
 
 $config = new Authorization\Config([
     'expireInterval' => 'PT1M', // as \DateInterval value format
+    'refreshExpireInterval' => 'PT1M', // same as expireInterval, used for refresh token
 ]);
 
 $config = new Authorization\Config([
-    'expireInterval' => new \DateInterval("PT1M"), // as \DateInterval instance
+    'expireInterval' => new \DateInterval("PT1M"), // as \DateInterval instance,
+    'refreshExpireInterval' => 'PT1M',
 ]);
 
 $config = new Authorization\Config([
     'expireInterval' => function(): \DateInterval {
         return new \DateInterval("PT1M");
     }, // as \Closure that returns \DateInterval
+    'refreshExpireInterval' => 'PT1M',
 ]);
 ```
 
 #### Environment configuration
 To use environment to configure authorization you should use [EnvironmentConfig](./src / EnvironmentConfig . php).  
 Environment keys(with default prefix):
-- **AUTHORIZATION_EXPIRE_INTERVAL ** -(default: null), seconds before tokens will be expired
+- **AUTHORIZATION_EXPIRE_INTERVAL ** -(default: null), seconds before access token will be expired
+- **AUTHORIZATION_REFRESH_EXPIRE_INTERVAL ** -(default: null), seconds before refresh token will be expired
 
 ```php
 <?php
@@ -63,6 +67,7 @@ use Wearesho\Yii2\Authorization;
 
 $config = new Authorization\EnvironmentConfig();
 $config->getExpireInterval(0); // AUTHORIZATION_EXPIRE_INTERVAL will be loaded from environment
+$config->getRefreshExpireInterval(0); // AUTHORIZATION_REFRESH_EXPIRE_INTERVAL will be loaded from environment
 
 ```
 
@@ -114,8 +119,9 @@ return [
         'authorization' => [
             'class' => Authorization\Bootstrap::class,
             'config' => [
-              'class' => Authorization\Config::class,
+                'class' => Authorization\Config::class,
                 'expireInterval' => 'PT30M', // 30 minutes
+                'refreshExpireInterval' => 'PT90M', // 90 minutes
             ],
         ],
     ],
