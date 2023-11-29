@@ -104,19 +104,21 @@ class Repository extends base\BaseObject
             (string)$this->factory->uuid4(),
             (string)$this->factory->uuid4()
         );
-        $expire = Carbon::now()->add($this->config->getExpireInterval($userId))
+        $expireAccess = Carbon::now()->add($this->config->getExpireInterval($userId))
+            ->diffInSeconds();
+        $expireRefresh = Carbon::now()->add($this->config->getRefreshExpireInterval($userId))
             ->diffInSeconds();
 
         $this->redis->multi();
 
         $this->redis->setex(
             $accessKey = $this->getAccessKey($token->getAccess()),
-            $expire,
+            $expireAccess,
             $userId
         );
         $this->redis->setex(
             $refreshKey = $this->getRefreshKey($token->getRefresh()),
-            $expire,
+            $expireRefresh,
             $token->getAccess()
         );
 

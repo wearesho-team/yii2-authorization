@@ -130,6 +130,31 @@ class RepositoryTest extends TestCase
         );
     }
 
+    public function testTtlWithInvalidValue(): void
+    {
+        $repository = new Authorization\Repository([
+            'redis' => $redis = $this->createMock(redis\Connection::class),
+            'config' => $this->createMock(Authorization\Config::class),
+            'factory' => new UuidFactory(),
+        ]);
+
+        /** @noinspection PhpUnhandledExceptionInspection */
+        $token = "NOT_UUID";
+
+        $redis
+            ->expects($this->never())
+            ->method('__call')
+            ->with(
+                $this->equalTo('ttl'),
+                $this->equalTo(["access-{$token}"])
+            );
+
+
+        $this->assertNull(
+            $repository->ttl((string)$token)
+        );
+    }
+
     public function testDeleteWithInvalidToken(): void
     {
         $repository = new Authorization\Repository([
@@ -268,13 +293,18 @@ class RepositoryTest extends TestCase
 
         $userId = 13371;
         $expireInterval = 30;
+        $refreshExpireInterval = 90;
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $config
             ->expects($this->once())
             ->method('getExpireInterval')
             ->with($userId)
             ->willReturn(new \DateInterval('PT' . $expireInterval . 'S'));
+        $config
+            ->expects($this->once())
+            ->method('getRefreshExpireInterval')
+            ->with($userId)
+            ->willReturn(new \DateInterval('PT' . $refreshExpireInterval . 'S'));
 
         $factory
             ->expects($this->exactly(2))
@@ -284,7 +314,16 @@ class RepositoryTest extends TestCase
         $redis->expects($this->exactly(4))
             ->method('__call')
             ->willReturnCallback(
-                function (string $method, array $keys) use ($access, $refresh, $expireInterval, $userId) {
+                function (
+                    string $method,
+                    array $keys
+                ) use (
+                    $access,
+                    $refresh,
+                    $expireInterval,
+                    $refreshExpireInterval,
+                    $userId
+                ) {
                     switch ($method) {
                         case "multi":
                         case "exec":
@@ -295,7 +334,7 @@ class RepositoryTest extends TestCase
                             [$key, $expire, $value] = $keys;
                             switch ($key) {
                                 case "refresh-{$refresh}":
-                                    $this->assertEquals($expireInterval, $expire);
+                                    $this->assertEquals($refreshExpireInterval, $expire);
                                     $this->assertEquals($access, $value);
                                     return null;
                                 case "access-{$access}":
