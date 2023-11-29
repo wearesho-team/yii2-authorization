@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\UuidFactoryInterface;
+use Wearesho\Yii2\Authorization\Repository\RefreshTokenValueEncoder;
 use yii\di;
 use yii\base;
 use yii\redis;
@@ -23,6 +24,9 @@ class Repository extends base\BaseObject
     /** @var array|string|ConfigInterface */
     public $config = ConfigInterface::class;
 
+    /** @var array|string|RefreshTokenValueEncoder */
+    public $refreshEncoder = Repository\RefreshTokenValueEncoder::class;
+
     /**
      * @throws base\InvalidConfigException
      */
@@ -32,6 +36,10 @@ class Repository extends base\BaseObject
         $this->redis = di\Instance::ensure($this->redis, redis\Connection::class);
         $this->config = di\Instance::ensure($this->config, ConfigInterface::class);
         $this->factory = di\Instance::ensure($this->factory, UuidFactoryInterface::class);
+        $this->refreshEncoder = di\Instance::ensure(
+            $this->refreshEncoder,
+            Repository\RefreshTokenValueEncoder::class
+        );
     }
 
     /**
@@ -80,21 +88,22 @@ class Repository extends base\BaseObject
         }
 
         $refreshKey = $this->getRefreshKey($refresh);
-        $access = $this->redis->get($refreshKey);
-        if (is_null($access)) {
+        $refreshTokenValueEncoded = $this->redis->get($refreshKey);
+        if (is_null($refreshTokenValueEncoded)) {
+            return null;
+        }
+        $refreshTokenValue = $this->refreshEncoder->decode($refreshTokenValueEncoded);
+        if (is_null($refreshTokenValue)) {
+            $this->redis->del($refreshKey);
             return null;
         }
 
-        $accessKey = $this->getAccessKey($access);
-        /** @var string|null $userId */
-        $userId = $this->redis->get($accessKey);
-
+        $accessKey = $this->getAccessKey($refreshTokenValue->getAccessToken());
         $this->redis->del(
             $refreshKey,
             $accessKey
         );
-
-        return (int)$userId ?: null;
+        return $refreshTokenValue->getUserId();
     }
 
     public function create(int $userId): Token
@@ -116,10 +125,13 @@ class Repository extends base\BaseObject
             $expireAccess,
             $userId
         );
+
         $this->redis->setex(
-            $refreshKey = $this->getRefreshKey($token->getRefresh()),
+            $this->getRefreshKey($token->getRefresh()),
             $expireRefresh,
-            $token->getAccess()
+            $this->refreshEncoder->encode(
+                new Repository\RefreshTokenValue($token->getAccess(), $userId)
+            )
         );
 
         $this->redis->exec();
