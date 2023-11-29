@@ -6,11 +6,8 @@ namespace Wearesho\Yii2\Authorization\Tests;
 
 use PHPUnit\Framework\TestCase;
 use Wearesho\Yii2\Authorization;
+use yii\base;
 
-/**
- * Class ConfigTest
- * @package Wearesho\Yii2\Authorization\Tests
- */
 class ConfigTest extends TestCase
 {
     public function testExpireIntervalAsString(): void
@@ -18,22 +15,19 @@ class ConfigTest extends TestCase
         $config = new Authorization\Config([
             'expireInterval' => 'PT1M',
         ]);
-        /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertEquals(
             new \DateInterval("PT1M"),
             $config->getExpireInterval(0)
         );
     }
 
-    /**
-     * @expectedException \yii\base\InvalidConfigException
-     * @expectedExceptionCode 1
-     */
     public function testExpireIntervalAsInvalidString(): void
     {
         $invalidString = 'P30M2';
+        $this->expectException(base\InvalidConfigException::class);
+        $this->expectExceptionCode(1);
         $this->expectExceptionMessage(
-            "Invalid expireInterval format: DateInterval::__construct(): Unknown or bad format (P30M2)"
+            "Invalid expireInterval format: Unknown or bad format (P30M2)"
         );
         new Authorization\Config([
             'expireInterval' => $invalidString,
@@ -42,7 +36,6 @@ class ConfigTest extends TestCase
 
     public function testExpireIntervalAsInstance(): void
     {
-        /** @noinspection PhpUnhandledExceptionInspection */
         $interval = new \DateInterval("PT1M");
 
         $config = new Authorization\Config([
@@ -62,17 +55,12 @@ class ConfigTest extends TestCase
             'expireInterval' => $getInterval,
         ]);
 
-        /** @noinspection PhpUnhandledExceptionInspection */
         $this->assertEquals(
             new \DateInterval("PT30M"),
             $config->getExpireInterval(0)
         );
     }
 
-    /**
-     * @expectedException \yii\base\InvalidConfigException
-     * @expectedExceptionCode 2
-     */
     public function testExpireIntervalAsInvalidClosure(): void
     {
         $invalidClosure = function (): \stdClass {
@@ -82,16 +70,13 @@ class ConfigTest extends TestCase
         $this->expectExceptionMessage(
             "Invalid expireInterval format: must be \DateInterval or \Closure that returns \DateInterval"
         );
-
+        $this->expectExceptionCode(2);
+        $this->expectException(base\InvalidConfigException::class);
         new Authorization\Config([
             'expireInterval' => $invalidClosure,
         ]);
     }
 
-    /**
-     * @expectedException \yii\base\InvalidConfigException
-     * @expectedExceptionCode 2
-     */
     public function testExpireIntervalAsInvalidObject(): void
     {
         $invalidObject = new \stdClass();
@@ -99,19 +84,21 @@ class ConfigTest extends TestCase
         $this->expectExceptionMessage(
             "Invalid expireInterval format: must be \DateInterval or \Closure that returns \DateInterval"
         );
+        $this->expectExceptionCode(2);
+        $this->expectException(base\InvalidConfigException::class);
 
         new Authorization\Config([
             'expireInterval' => $invalidObject,
         ]);
     }
 
-    /**
-     * @expectedException \yii\base\InvalidConfigException
-     * @expectedExceptionMessage expireInterval must be set
-     * @expectedExceptionCode 0
-     */
     public function testEmptyExpireInterval(): void
     {
+        $this->expectException(base\InvalidConfigException::class);
+        $this->expectExceptionMessage(
+            "expireInterval must be set"
+        );
+        $this->expectExceptionCode(0);
         new Authorization\Config;
     }
 }
