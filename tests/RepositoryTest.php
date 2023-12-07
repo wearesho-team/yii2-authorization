@@ -17,12 +17,15 @@ class RepositoryTest extends TestCase
     public function testGetWithInvalidUuidToken(): void
     {
         $repository = new Authorization\Repository([
-            'redis' => $this->createMock(redis\Connection::class),
+            'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
             'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ])
         ]);
         $id = $repository->get('notUuid');
         $this->assertNull($id);
@@ -37,6 +40,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -67,6 +73,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -96,6 +105,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -126,6 +138,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -155,6 +170,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -177,12 +195,15 @@ class RepositoryTest extends TestCase
     public function testDeleteWithInvalidToken(): void
     {
         $repository = new Authorization\Repository([
-            'redis' => $this->createMock(redis\Connection::class),
+            'redis' => $redis = $this->createMock(redis\Connection::class),
             'config' => $this->createMock(Authorization\Config::class),
             'factory' => new UuidFactory(new FeatureSet()),
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
         $invalidToken = 'notUuid';
 
@@ -198,6 +219,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -227,6 +251,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $refreshEncoder = $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -274,6 +301,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $refreshEncoder = $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
@@ -288,11 +318,11 @@ class RepositoryTest extends TestCase
             ->with(sha1($accessToken))
             ->willReturn(new Authorization\Repository\RefreshTokenValue($accessToken, $userId));
 
-        $redis->expects($this->exactly(2))
+        $redis->expects($this->exactly(5))
             ->method('__call')
             ->willReturnCallback(
                 function (string $method, array $keys) use ($accessToken, $refreshToken, $userId) {
-                    $this->assertContains($method, ['get', 'del']);
+                    $this->assertContains($method, ['get', 'del', 'multi', 'exec',]);
                     switch ($method) {
                         case 'get':
                             $this->assertCount(1, $keys);
@@ -305,8 +335,12 @@ class RepositoryTest extends TestCase
                             }
                             return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                         case "del":
-                            $this->assertEquals($keys, ["refresh-{$refreshToken}", "access-{$accessToken}"]);
+                            $this->assertCount(1, $keys);
+                            $this->assertContains($keys[0], ["refresh-{$refreshToken}", "access-{$accessToken}"]);
                             return $userId;
+                        case 'multi':
+                        case 'exec':
+                            return null;
                     }
                     $this->fail("Unexpected method: {$method} (Redis Mock)");
                 }
@@ -318,7 +352,7 @@ class RepositoryTest extends TestCase
         );
     }
 
-    public function testCreatingValidUuidTokenPaid(): void
+    public function testCreatingValidUuidTokenPair(): void
     {
         $repository = new Authorization\Repository([
             'redis' => $redis = $this->createMock(redis\Connection::class),
@@ -327,6 +361,9 @@ class RepositoryTest extends TestCase
             'refreshEncoder' => $refreshEncoder = $this->createMock(
                 Authorization\Repository\RefreshTokenValueEncoder::class
             ),
+            'refreshStorage' => new Authorization\Repository\RefreshTokenStorageRedis([
+                'redis' => $redis,
+            ]),
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
