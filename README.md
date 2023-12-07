@@ -124,6 +124,10 @@ return [
                 'refreshExpireInterval' => 'PT90M', // 90 minutes
             ],
             // optional: you can configure refresh token storage
+            'refreshTokenStorage' => [
+                // default implementation, use your own if you want or choose one from list below
+                'class' => Authorization\Repository\RefreshTokenStorageRedis::class,
+            ],
         ],
     ],
 ];
