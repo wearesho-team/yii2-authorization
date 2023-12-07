@@ -123,11 +123,19 @@ return [
                 'expireInterval' => 'PT30M', // 30 minutes
                 'refreshExpireInterval' => 'PT90M', // 90 minutes
             ],
+            // optional: you can configure refresh token storage
         ],
     ],
 ];
 
 ```
+
+For refresh token storage configuration you need to pass definition 
+of [RefreshTokenStorage](./src/Repository/RefreshTokenStorage.php) implementation.
+
+Available implementation:
+- [wearesho-team/yii2-authorization-refresh-storage-db](https://github.com/wearesho-team/yii2-authorization-refresh-storage-db)
+for storing refresh token using SQL database.
 
 ### HasToken
 To implement part of yii`s web\Identity interface you should use
