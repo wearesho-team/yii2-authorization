@@ -4,14 +4,13 @@ declare(strict_types=1);
 
 namespace Wearesho\Yii2\Authorization;
 
-use Carbon\Carbon;
-use Ramsey\Uuid\Uuid;
-use Ramsey\Uuid\UuidFactory;
 use Ramsey\Uuid\UuidFactoryInterface;
-use Wearesho\Yii2\Authorization\Repository\RefreshTokenValueEncoder;
-use yii\di;
-use yii\base;
+use Ramsey\Uuid\UuidFactory;
+use Ramsey\Uuid\Uuid;
+use Carbon\Carbon;
 use yii\redis;
+use yii\base;
+use yii\di;
 
 class Repository extends base\BaseObject
 {
@@ -24,8 +23,11 @@ class Repository extends base\BaseObject
     /** @var array|string|ConfigInterface */
     public $config = ConfigInterface::class;
 
-    /** @var array|string|RefreshTokenValueEncoder */
+    /** @var array|string|Repository\RefreshTokenValueEncoder */
     public $refreshEncoder = Repository\RefreshTokenValueEncoder::class;
+
+    /** @var array|string|Repository\RefreshTokenStorage */
+    public $refreshStorage = Repository\RefreshTokenStorage::class;
 
     /**
      * @throws base\InvalidConfigException
@@ -39,6 +41,10 @@ class Repository extends base\BaseObject
         $this->refreshEncoder = di\Instance::ensure(
             $this->refreshEncoder,
             Repository\RefreshTokenValueEncoder::class
+        );
+        $this->refreshStorage = di\Instance::ensure(
+            $this->refreshStorage,
+            Repository\RefreshTokenStorage::class
         );
     }
 
@@ -88,21 +94,28 @@ class Repository extends base\BaseObject
         }
 
         $refreshKey = $this->getRefreshKey($refresh);
-        $refreshTokenValueEncoded = $this->redis->get($refreshKey);
+        $refreshTokenValueEncoded = $this->refreshStorage->pull($refreshKey);
         if (is_null($refreshTokenValueEncoded)) {
             return null;
         }
         $refreshTokenValue = $this->refreshEncoder->decode($refreshTokenValueEncoded);
         if (is_null($refreshTokenValue)) {
-            $this->redis->del($refreshKey);
+            $this->refreshStorage->delete($refreshKey);
             return null;
         }
 
         $accessKey = $this->getAccessKey($refreshTokenValue->getAccessToken());
+
+        $this->redis->multi();
+
         $this->redis->del(
-            $refreshKey,
             $accessKey
         );
+
+        $this->refreshStorage->delete($refreshKey);
+
+        $this->redis->exec();
+
         return $refreshTokenValue->getUserId();
     }
 
@@ -115,23 +128,22 @@ class Repository extends base\BaseObject
         );
         $expireAccess = Carbon::now()->add($this->config->getExpireInterval($userId))
             ->diffInSeconds();
-        $expireRefresh = Carbon::now()->add($this->config->getRefreshExpireInterval($userId))
-            ->diffInSeconds();
+        $expireRefresh = Carbon::now()->add($this->config->getRefreshExpireInterval($userId));
 
         $this->redis->multi();
 
         $this->redis->setex(
-            $accessKey = $this->getAccessKey($token->getAccess()),
+            $this->getAccessKey($token->getAccess()),
             $expireAccess,
             $userId
         );
 
-        $this->redis->setex(
+        $this->refreshStorage->push(
             $this->getRefreshKey($token->getRefresh()),
-            $expireRefresh,
             $this->refreshEncoder->encode(
                 new Repository\RefreshTokenValue($token->getAccess(), $userId)
-            )
+            ),
+            $expireRefresh
         );
 
         $this->redis->exec();
