@@ -20,7 +20,7 @@ class RefreshTokenStorageRedis extends base\BaseObject implements RefreshTokenSt
 
     public function push(string $key, string $value, Carbon $expireAt): void
     {
-        $expireRefresh = (int)$expireAt->diffInSeconds();
+        $expireRefresh = (int)$expireAt->diffInSeconds(absolute: true);
         $this->redis->setex(
             $key,
             $expireRefresh,
