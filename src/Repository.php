@@ -126,7 +126,7 @@ class Repository extends base\BaseObject
             (string)$this->factory->uuid4(),
             (string)$this->factory->uuid4()
         );
-        $expireAccess = Carbon::now()->add($this->config->getExpireInterval($userId))
+        $expireAccess = (int)Carbon::now()->add($this->config->getExpireInterval($userId))
             ->diffInSeconds();
         $expireRefresh = Carbon::now()->add($this->config->getRefreshExpireInterval($userId));
 
