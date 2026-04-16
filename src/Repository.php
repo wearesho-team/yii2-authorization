@@ -106,15 +106,8 @@ class Repository extends base\BaseObject
 
         $accessKey = $this->getAccessKey($refreshTokenValue->getAccessToken());
 
-        $this->redis->multi();
-
-        $this->redis->del(
-            $accessKey
-        );
-
+        $this->redis->del($accessKey);
         $this->refreshStorage->delete($refreshKey);
-
-        $this->redis->exec();
 
         return $refreshTokenValue->getUserId();
     }
@@ -130,8 +123,6 @@ class Repository extends base\BaseObject
             ->diffInSeconds(absolute: true);
         $expireRefresh = Carbon::now()->add($this->config->getRefreshExpireInterval($userId));
 
-        $this->redis->multi();
-
         $this->redis->setex(
             $this->getAccessKey($token->getAccess()),
             $expireAccess,
@@ -145,8 +136,6 @@ class Repository extends base\BaseObject
             ),
             $expireRefresh
         );
-
-        $this->redis->exec();
 
         return $token;
     }

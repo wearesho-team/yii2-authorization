@@ -318,11 +318,11 @@ class RepositoryTest extends TestCase
             ->with(sha1($accessToken))
             ->willReturn(new Authorization\Repository\RefreshTokenValue($accessToken, $userId));
 
-        $redis->expects($this->exactly(5))
+        $redis->expects($this->exactly(3))
             ->method('__call')
             ->willReturnCallback(
                 function (string $method, array $keys) use ($accessToken, $refreshToken, $userId) {
-                    $this->assertContains($method, ['get', 'del', 'multi', 'exec',]);
+                    $this->assertContains($method, ['get', 'del']);
                     switch ($method) {
                         case 'get':
                             $this->assertCount(1, $keys);
@@ -330,17 +330,12 @@ class RepositoryTest extends TestCase
                             switch ($key) {
                                 case "refresh-{$refreshToken}":
                                     return sha1($accessToken);
-                                case "access-{$accessToken}":
-                                    return $userId;
                             }
                             return $this->fail("Unexpected key: {$key} for method {$method} (Redis Mock)");
                         case "del":
                             $this->assertCount(1, $keys);
                             $this->assertContains($keys[0], ["refresh-{$refreshToken}", "access-{$accessToken}"]);
                             return $userId;
-                        case 'multi':
-                        case 'exec':
-                            return null;
                     }
                     $this->fail("Unexpected method: {$method} (Redis Mock)");
                 }
@@ -367,9 +362,11 @@ class RepositoryTest extends TestCase
         ]);
 
         /** @noinspection PhpUnhandledExceptionInspection */
-        $access = Uuid::uuid4()->toString();
+        $accessUuid = Uuid::uuid4();
         /** @noinspection PhpUnhandledExceptionInspection */
-        $refresh = Uuid::uuid4()->toString();
+        $refreshUuid = Uuid::uuid4();
+        $access = $accessUuid->toString();
+        $refresh = $refreshUuid->toString();
 
         $userId = 13371;
         $expireInterval = 30;
@@ -395,9 +392,9 @@ class RepositoryTest extends TestCase
         $factory
             ->expects($this->exactly(2))
             ->method('uuid4')
-            ->willReturn($access, $refresh);
+            ->willReturn($accessUuid, $refreshUuid);
 
-        $redis->expects($this->exactly(4))
+        $redis->expects($this->exactly(2))
             ->method('__call')
             ->willReturnCallback(
                 function (
@@ -411,10 +408,6 @@ class RepositoryTest extends TestCase
                     $userId
                 ) {
                     switch ($method) {
-                        case "multi":
-                        case "exec":
-                            $this->assertEquals([], $keys);
-                            return null;
                         case 'setex':
                             $this->assertCount(3, $keys);
                             [$key, $expire, $value] = $keys;
