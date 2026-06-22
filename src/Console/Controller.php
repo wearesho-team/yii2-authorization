@@ -65,6 +65,13 @@ class Controller extends console\Controller
 
         $this->stdout("TTL = {$ttl}s ");
         $this->stdout("(expire {$expire})" . PHP_EOL, helpers\Console::FG_GREY);
+
+        $value = $this->repository->get($access);
+        if (is_null($value)) {
+            $this->stdout("Value Not Found" . PHP_EOL, helpers\Console::FG_RED);
+            return;
+        }
+        $this->stdout("Value = {$value}" . PHP_EOL, helpers\Console::FG_GREEN);
     }
 
     /**
