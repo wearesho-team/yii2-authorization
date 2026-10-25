@@ -19,7 +19,7 @@ class HasTokenTest extends TestCase
             ->expects($this->once())
             ->method('get')
             ->with(Authorization\Repository::class)
-            ->willReturn($repository = $this->createMock(Authorization\Repository::class));
+            ->willReturn($repository = $this->createStub(Authorization\Repository::class));
 
         $user = new class ()
         {

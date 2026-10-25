@@ -4,10 +4,12 @@
 
 Authorizing users using redis tokens for Yii2
 
+Compatibility: tested on PHP 8.4, PHP 8.5
+
 ## Installation
 
 ```bash
-composer require wearesho-team/yii2-authorization:^2.0
+composer require wearesho-team/yii2-authorization:^2.6
 ```
 
 ## Usage
@@ -55,10 +57,10 @@ $config = new Authorization\Config([
 ```
 
 #### Environment configuration
-To use environment to configure authorization you should use [EnvironmentConfig](./src / EnvironmentConfig . php).  
+To use environment to configure authorization you should use [EnvironmentConfig](./src/EnvironmentConfig.php).  
 Environment keys(with default prefix):
-- **AUTHORIZATION_EXPIRE_INTERVAL ** -(default: null), seconds before access token will be expired
-- **AUTHORIZATION_REFRESH_EXPIRE_INTERVAL ** -(default: null), seconds before refresh token will be expired
+- **AUTHORIZATION_EXPIRE_INTERVAL** - (default: null), seconds before access token will be expired
+- **AUTHORIZATION_REFRESH_EXPIRE_INTERVAL** - (default: null), seconds before refresh token will be expired
 
 ```php
 <?php

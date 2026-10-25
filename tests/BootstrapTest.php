@@ -35,7 +35,7 @@ class BootstrapTest extends TestCase
         $container = $this->createMock(di\Container::class);
         \Yii::$container = $container;
 
-        $configDefinition = $this->createMock(Authorization\Config::class);
+        $configDefinition = $this->createStub(Authorization\Config::class);
         $refreshTokenStorageDefinition = [
             'class' => Authorization\Repository\RefreshTokenStorageRedis::class,
             'redis' => 'redis2',
@@ -69,6 +69,6 @@ class BootstrapTest extends TestCase
             'config' => $configDefinition,
             'refreshTokenStorage' => $refreshTokenStorageDefinition,
         ]);
-        $bootstrap->bootstrap($this->createMock(base\Application::class));
+        $bootstrap->bootstrap($this->createStub(base\Application::class));
     }
 }

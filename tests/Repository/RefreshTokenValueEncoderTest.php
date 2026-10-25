@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Wearesho\Yii2\Authorization\Tests\Repository;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Ramsey\Uuid\Uuid;
 use Wearesho\Yii2\Authorization\Repository\RefreshTokenValue;
@@ -11,7 +12,7 @@ use Wearesho\Yii2\Authorization\Repository\RefreshTokenValueEncoder;
 
 class RefreshTokenValueEncoderTest extends TestCase
 {
-    public function decodingDataProvider(): iterable
+    public static function decodingDataProvider(): iterable
     {
         return [
             [Uuid::uuid4()->toString(), null], // deprecated values
@@ -24,9 +25,7 @@ class RefreshTokenValueEncoderTest extends TestCase
         ];
     }
 
-    /**
-     * @dataProvider decodingDataProvider
-     */
+    #[DataProvider('decodingDataProvider')]
     public function testDecoding(string $encodedValue, ?RefreshTokenValue $expectedValue): void
     {
         $encoder = new RefreshTokenValueEncoder();
